@@ -1,12 +1,14 @@
-# Heart Disease Prediction Using Machine Learning
+# ❤️ Heart Disease Prediction Using Machine Learning
 
 ## 📌 Project Overview
 
 This project explores the application of machine learning classification algorithms to predict the presence of heart disease using clinical and medical features.
 
-The project includes Exploratory Data Analysis (EDA), feature engineering, data preprocessing, model training, and evaluation. Four classification approaches are compared to identify models that achieve strong predictive performance on the test dataset.
+The project covers Exploratory Data Analysis (EDA), feature engineering, data preprocessing, model training, hyperparameter tuning, and performance evaluation. Four classification models were compared to assess their predictive performance and generalization on unseen data.
 
-**The goal is to investigate how machine learning can support heart disease prediction. This project is educational and is not intended for clinical diagnosis.**
+The primary objective is to investigate how machine learning can support heart disease risk prediction in an educational setting.
+
+> **Disclaimer:** This project is for educational purposes only. Its predictions are not intended for clinical diagnosis or medical decision-making.
 
 ---
 
@@ -52,7 +54,7 @@ The project uses `heart.csv`, which contains patient-related clinical features a
 
 ## 🔍 1. Exploratory Data Analysis (EDA)
 
-The dataset was explored to understand its structure, distributions, and relationships between clinical features and the target variable.
+The dataset was explored to understand its structure, feature distributions, and relationships with the target variable.
 
 The analysis included:
 
@@ -64,13 +66,13 @@ The analysis included:
 * Investigating cholesterol, blood pressure, and maximum heart rate using visualizations.
 * Examining potential cholesterol outliers using the Interquartile Range (IQR) method.
 
-Visualizations were created using Seaborn, Matplotlib, and Plotly.
+Visualizations were created using Matplotlib, Seaborn, and Plotly.
 
 ---
 
 ## ⚙️ 2. Feature Engineering
 
-Three additional features were created to explore potentially useful relationships in the data.
+Three additional features were created to explore potentially useful relationships among the clinical variables.
 
 ### Estimated Maximum Heart Rate
 
@@ -80,21 +82,23 @@ Calculated using:
 
 ### Heart Rate Achievement Percentage
 
-Calculated as the patient's maximum heart rate divided by the estimated maximum heart rate, multiplied by 100.
+Calculated as:
 
 `Heart_Rate_Achievement_Percentage = (MaxHR / Estimated_Max_HR) * 100`
 
+This feature represents the percentage of the estimated maximum heart rate achieved by the patient.
+
 ### Age–Blood Pressure Interaction
+
+Calculated using:
 
 `Age_BP_Interaction = Age * RestingBP`
 
-These features were introduced to represent additional relationships between age, blood pressure, and heart rate.
+This feature represents a potential interaction between age and resting blood pressure.
 
 ---
 
 ## 🧹 3. Data Preprocessing
-
-The following preprocessing steps were applied:
 
 ### Encoding Categorical Features
 
@@ -103,19 +107,21 @@ The following preprocessing steps were applied:
 
 ### Feature Scaling
 
-StandardScaler was applied to the following numerical features:
+`StandardScaler` was applied to numerical features, including:
 
-* Age
-* RestingBP
-* Cholesterol
-* MaxHR
-* Estimated_Max_HR
-* Heart_Rate_Achievement_Percentage
-* Age_BP_Interaction
+* `Age`
+* `RestingBP`
+* `Cholesterol`
+* `MaxHR`
+* `Estimated_Max_HR`
+* `Heart_Rate_Achievement_Percentage`
+* `Age_BP_Interaction`
+
+Feature scaling is particularly important for distance-based algorithms such as K-Nearest Neighbors (KNN).
 
 ### Train-Test Split
 
-The dataset was split into training and testing sets using:
+The dataset was divided into training and testing sets using the following configuration:
 
 * **Training set:** 80%
 * **Testing set:** 20%
@@ -128,75 +134,96 @@ The dataset was split into training and testing sets using:
 
 Four classification approaches were implemented and evaluated.
 
-### 1. Logistic Regression
+### 1. Standard Logistic Regression
 
-A standard Logistic Regression classifier was used as the baseline model.
+Used as a baseline classification model to establish a reference for comparison with the other approaches.
 
-### 2. Logistic Regression with Polynomial Features
+### 2. Polynomial Logistic Regression
 
-Polynomial features of degree 2 were generated to introduce nonlinear feature combinations before training Logistic Regression.
-
-This approach was investigated to determine whether additional feature interactions could improve predictive performance.
+Polynomial features of degree 2 were generated before training Logistic Regression to capture potential nonlinear relationships and feature interactions.
 
 ### 3. K-Nearest Neighbors (KNN)
 
 KNN was trained using scaled features.
 
-GridSearchCV with 5-fold cross-validation was used to search for the best number of neighbors from `k = 1` to `k = 10`.
+`GridSearchCV` with 5-fold cross-validation was used to search for the optimal number of neighbors, with candidate values ranging from `k = 1` to `k = 10`.
 
-The final KNN model was trained using the selected value of `k`.
+The selected configuration was `k = 5`.
 
 ### 4. Decision Tree Classifier
 
-A Decision Tree classifier was trained with:
+A Decision Tree classifier was used to explore nonlinear decision rules and feature-based splits.
 
-* `random_state = 42`
-* `max_depth = 4`
-
-The depth restriction was used to limit tree complexity.
+The tree's depth was restricted to control model complexity and help reduce overfitting.
 
 ---
 
 ## 📊 5. Model Evaluation
 
-The models were evaluated using several classification metrics:
+The models were evaluated using the following metrics:
 
-| Metric           | Purpose                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------- |
-| Accuracy         | Measures the proportion of correctly classified observations.                          |
-| MAE              | Measures the average absolute difference between binary predictions and actual labels. |
-| Confusion Matrix | Shows true positives, true negatives, false positives, and false negatives.            |
-| Precision        | Measures the proportion of positive predictions that are correct.                      |
-| Recall           | Measures the proportion of actual positive cases identified by the model.              |
-| F1-score         | Combines precision and recall into a single metric.                                    |
-| ROC Curve        | Visualizes the trade-off between true positive and false positive rates.               |
-| ROC-AUC          | Measures how well the model distinguishes between the two target classes.              |
+| Metric                    | Purpose                                                                                                   |
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Accuracy                  | Measures the proportion of correctly classified observations.                                             |
+| Mean Absolute Error (MAE) | Measures the average absolute difference between binary predictions and actual labels.                    |
+| Confusion Matrix          | Summarizes true positives, true negatives, false positives, and false negatives.                          |
+| Precision                 | Measures the proportion of positive predictions that are correct.                                         |
+| Recall                    | Measures the proportion of actual positive cases correctly identified.                                    |
+| F1-score                  | Combines precision and recall into a single metric.                                                       |
+| ROC Curve                 | Visualizes the trade-off between true positive and false positive rates across classification thresholds. |
+| ROC-AUC                   | Measures how well the model distinguishes between the two target classes.                                 |
 
-Training and testing accuracy were also compared to investigate potential overfitting.
+Training and testing metrics were also compared to assess generalization and identify potential overfitting or underfitting.
 
 ---
 
-## 🏆 6. Results & Model Comparison
+## 🏆 6. Model Evaluation & Comparison Results
 
-The following results are reported in the project's final evaluation section.
+The following table summarizes the reported performance of the four models.
 
-| Model                                        | Test Accuracy | ROC-AUC |
-| -------------------------------------------- | ------------: | ------: |
-| Logistic Regression                          |        88.59% |    0.93 |
-| KNN (K = 5)                                  |        88.59% |    0.93 |
-| Logistic Regression with Polynomial Features |        85.87% |    0.91 |
-| Decision Tree                                |        84.24% |    0.87 |
+| Model                          | Training Accuracy | Testing Accuracy | Training MAE | Testing MAE |  ROC-AUC |
+| ------------------------------ | ----------------: | ---------------: | -----------: | ----------: | -------: |
+| Standard Logistic Regression   |            86.10% |           88.59% |         0.14 |        0.11 | **0.93** |
+| Polynomial Logistic Regression |            90.87% |           82.61% |         0.09 |        0.17 |     0.87 |
+| KNN (`k = 5`)                  |            88.15% |       **89.67%** |         0.12 |    **0.10** |     0.92 |
+| Decision Tree                  |            85.56% |           80.98% |         0.14 |        0.19 |     0.88 |
+
+*Note: These values reflect the reported evaluation results. Ensure that all metrics are calculated from the same train-test split and final model configurations.*
 
 ### Key Findings
 
-* **Logistic Regression** achieved 88.59% test accuracy and an ROC-AUC of 0.93.
-* **KNN (K = 5)** achieved the same reported test accuracy and ROC-AUC as standard Logistic Regression.
-* Polynomial Logistic Regression did not outperform the standard Logistic Regression model in the reported results.
-* The Decision Tree achieved lower test accuracy and ROC-AUC than the two leading models.
+**🥇 K-Nearest Neighbors (KNN)**
 
-Based on the reported results, standard Logistic Regression and KNN were the top-performing models in this comparison.
+* Achieved the highest reported testing accuracy of **89.67%**.
+* Recorded the lowest reported testing MAE of **0.10**.
+* Achieved a ROC-AUC score of **0.92**.
+* Provided a strong balance between predictive performance and generalization in this experiment.
 
-**Important:** These results represent the project's reported evaluation and do not establish that either model is clinically reliable. Further validation, particularly with independent data, would be necessary before considering any real-world medical application.
+**🥈 Standard Logistic Regression**
+
+* Achieved a testing accuracy of **88.59%**.
+* Recorded the highest ROC-AUC score among the four models at **0.93**.
+* Demonstrated strong performance without the larger training-testing gap observed in Polynomial Logistic Regression.
+
+**Polynomial Logistic Regression**
+
+* Achieved a training accuracy of 90.87% but a lower testing accuracy of 82.61%.
+* The performance gap suggests potential overfitting: the model performed better on training data than on unseen testing data.
+* Adding polynomial features did not improve generalization in this experiment.
+
+**Decision Tree**
+
+* Achieved a testing accuracy of 80.98%.
+* Recorded a testing MAE of 0.19 and a ROC-AUC score of 0.88.
+* Had the lowest testing accuracy among the evaluated models.
+
+### 🏁 Final Verdict
+
+Based on the reported testing metrics, **KNN (`k = 5`) achieved the highest testing accuracy and lowest testing MAE**, making it the best-performing model by those two metrics in this experiment.
+
+Standard Logistic Regression remains a strong alternative, achieving the highest ROC-AUC score of **0.93**.
+
+The preferred model depends on the evaluation metric and the relative importance of different classification errors. In medical prediction tasks, accuracy alone is not sufficient; recall, precision, confusion matrices, and independent validation are also important.
 
 ---
 
@@ -206,34 +233,49 @@ Based on the reported results, standard Logistic Regression and KNN were the top
 Heart-Disease-Prediction/
 │
 ├── heart.csv
-├── heart_disease_prediction.ipynb
+├── Heart Disease Prediction Using Machine Learning.ipynb
+├── Heart Disease Prediction Using Machine Learning.py
 └── README.md
 ```
 
-*Update the notebook filename above to match the actual filename in your repository.*
+*The filenames above should match the actual files in the repository.*
 
 ---
 
 ## 🚀 How to Run the Project
 
-1. Clone or download this repository.
+### 1. Clone or Download the Repository
 
-2. Make sure Python is installed.
+Download the repository from GitHub or clone it using Git.
 
-3. Install the required libraries:
+### 2. Install the Required Libraries
 
-   ```bash
-   pip install pandas numpy seaborn matplotlib plotly scikit-learn
-   ```
+Make sure Python is installed, then run:
 
-4. Ensure `heart.csv` is located in the project directory.
+```bash
+pip install pandas numpy seaborn matplotlib plotly scikit-learn
+```
 
-5. Open the Jupyter Notebook.
+### 3. Prepare the Dataset
 
-6. Run the cells sequentially to perform EDA, preprocessing, model training, and evaluation.
+Ensure that `heart.csv` is located in the project directory.
+
+### 4. Run the Project
+
+Open the Jupyter Notebook in Jupyter Notebook or Visual Studio Code and execute the cells sequentially.
+
+Alternatively, run the Python script:
+
+```bash
+python "Heart Disease Prediction Using Machine Learning.py"
+```
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is for educational and machine learning practice purposes only. Its predictions should not be used to diagnose heart disease, make treatment decisions, or replace professional medical evaluation.
+This project is intended for educational purposes and machine learning practice only.
+
+The reported results do not establish clinical reliability. The models should not be used to diagnose heart disease, determine treatment, or replace professional medical evaluation.
+
+Any real-world medical application would require additional validation on independent and representative clinical data, careful assessment of false negatives and false positives, and appropriate clinical oversight.
