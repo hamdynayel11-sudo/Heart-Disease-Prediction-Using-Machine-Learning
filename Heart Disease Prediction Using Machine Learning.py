@@ -186,22 +186,6 @@ columns = ['ChestPainType', 'RestingECG', 'ST_Slope']
 encoding = pd.get_dummies(encoding, columns=columns, dtype=int)
 
 # %% [markdown]
-# ### Scaling
-
-# %%
-scaling_columns = [
-    'Age', 'RestingBP',
-    'Cholesterol', 'MaxHR',
-    'Estimated_Max_HR', 'Heart_Rate_Achievement_Percentage',
-    'Age_BP_Interaction'
-]
-
-scaler = StandardScaler()
-
-encoding[scaling_columns] = scaler.fit_transform(encoding[scaling_columns])
-
-
-# %% [markdown]
 # ## Splitting Data  
 
 # %%
@@ -214,6 +198,13 @@ y = encoding['HeartDisease']
 # %%
 x_train, x_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, random_state=42, stratify=y)
 
+# %%
+scaler = StandardScaler()
+
+x_train_scaled = scaler.fit_transform(x_train)
+
+x_test_scaled = scaler.transform(x_test)
+
 # %% [markdown]
 # ## Models Construction 
 
@@ -222,17 +213,17 @@ x_train, x_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, rand
 
 # %%
 logistic_model = LogisticRegression(max_iter=1000, random_state=42)
-logistic_model.fit(x_train, y_train)
+logistic_model.fit(x_train_scaled, y_train)
 
 # %%
-y_prediction_logistic = logistic_model.predict(x_test)
+y_prediction_logistic = logistic_model.predict(x_test_scaled)
 
 # %%
 # Predictions on training data
-y_train_logistic = logistic_model.predict(x_train)
+y_train_logistic = logistic_model.predict(x_train_scaled)
 
 # Predictions on testing data
-y_test_logistic = logistic_model.predict(x_test)
+y_test_logistic = logistic_model.predict(x_test_scaled)
 
 # Calculate errors
 logisitc_train_mae = mean_absolute_error(y_train, y_train_logistic)
@@ -248,8 +239,8 @@ print("Training Accuracy", round(logistic_trainig_accuracy, 2))
 print("Testing Accuracy", round(logistic_testing_accuracy, 2))
 
 # %%
-y_train_logistic = logistic_model.predict(x_train)
-y_test_logistic = logistic_model.predict(x_test)
+y_train_logistic = logistic_model.predict(x_train_scaled)
+y_test_logistic = logistic_model.predict(x_test_scaled)
 
 train_accuracy_logistic = accuracy_score(y_train, y_train_logistic)
 test_accuracy_logistic = accuracy_score(y_test, y_test_logistic)
@@ -275,7 +266,7 @@ plt.show()
 
 # %%
 # ROC Curve and AUC Score
-y_prob_logistic = logistic_model.predict_proba(x_test)[:, 1]
+y_prob_logistic = logistic_model.predict_proba(x_test_scaled)[:, 1]
 fpr, tpr, _ = roc_curve(y_test, y_prob_logistic)
 plt.plot(fpr, tpr, marker='.')
 plt.xlabel('False Positive Rate')
@@ -292,8 +283,8 @@ print(f"AUC Score: {auc_score:.2f}")
 # %%
 logistic_poly = PolynomialFeatures(degree = 2)
 
-x_train_poly = logistic_poly.fit_transform(x_train)
-x_test_poly = logistic_poly.transform(x_test)
+x_train_poly = logistic_poly.fit_transform(x_train_scaled)
+x_test_poly = logistic_poly.transform(x_test_scaled)
 
 # %%
 logistic_model_poly = LogisticRegression(max_iter=1000, random_state=42)
@@ -368,7 +359,7 @@ print(f"AUC Score: {auc_score:.2f}")
 param_grid = {'n_neighbors': range(1, 11)}  # Try k from 1 to 10
 knn = KNeighborsClassifier()
 grid_search = GridSearchCV(knn, param_grid, cv=5)  # 5-fold cross-validation
-grid_search.fit(x_train, y_train)
+grid_search.fit(x_train_scaled, y_train)
 
 # %%
 best_k = grid_search.best_params_['n_neighbors']
@@ -376,17 +367,17 @@ print(f"Best value for k: {best_k}")
 
 # %%
 knn_best = KNeighborsClassifier(n_neighbors=best_k)
-knn_best.fit(x_train, y_train)
+knn_best.fit(x_train_scaled, y_train)
 
 # %%
-y_knn = knn_best.predict(x_test)
+y_knn = knn_best.predict(x_test_scaled)
 
 # %%
 # Predictions on training data
-y_train_knn = knn_best.predict(x_train)
+y_train_knn = knn_best.predict(x_train_scaled)
 
 # Predictions on testing data
-y_test_knn = knn_best.predict(x_test)
+y_test_knn = knn_best.predict(x_test_scaled)
 
 # Calculate errors
 knn_train_mae = mean_absolute_error(y_train, y_train_knn)
@@ -402,8 +393,8 @@ print("Training Accuracy", round(knn_trainig_accuracy, 2))
 print("Testing Accuracy", round(knn_testing_accuracy, 2))
 
 # %%
-y_train_knn = knn_best.predict(x_train)
-y_test_knn = knn_best.predict(x_test)
+y_train_knn = knn_best.predict(x_train_scaled)
+y_test_knn = knn_best.predict(x_test_scaled)
 
 train_accuracy_knn = accuracy_score(y_train, y_train_knn)
 test_accuracy_knn = accuracy_score(y_test, y_test_knn)
@@ -429,7 +420,7 @@ plt.show()
 
 # %%
 # ROC Curve and AUC Score
-y_pre_knn = knn_best.predict_proba(x_test)[:, 1]
+y_pre_knn = knn_best.predict_proba(x_test_scaled)[:, 1]
 fpr, tpr, _ = roc_curve(y_test, y_pre_knn)
 plt.plot(fpr, tpr, marker='.')
 plt.xlabel('False Positive Rate')
@@ -444,30 +435,33 @@ print(f"AUC Score: {auc_score:.2f}")
 # ### 4. Decision Tree
 
 # %%
-X_tree = encoding.drop(columns=['HeartDisease', 'Sex', 'ExerciseAngina']) 
-y_tree = encoding['HeartDisease']
+param_grid_tree = {'max_depth': range(1, 11)}  
+decision_tree = DecisionTreeClassifier()
+grid_search_tree = GridSearchCV(decision_tree, param_grid_tree, cv=5)  
+grid_search_tree.fit(x_train, y_train)
 
 # %%
-X_train, X_test, Y_train, Y_test = train_test_split(X_tree, y_tree, test_size = 0.20, random_state=42, stratify=y)
+best_depth = grid_search_tree.best_params_['max_depth']
+print(f"Best value for depth: {best_depth}")
 
 # %%
-tree_model = DecisionTreeClassifier(random_state=42, max_depth=4)
+tree_model = DecisionTreeClassifier(random_state=42, max_depth=best_depth)
 
-tree_model.fit(X_train, Y_train)
+tree_model.fit(x_train, y_train)
 
 # %%
-y_tree_prediction = tree_model.predict(X_test)
+y_tree_prediction = tree_model.predict(x_test)
 
 # %%
 # Predictions on training data
-y_train_tree = tree_model.predict(X_train)
+y_train_tree = tree_model.predict(x_train)
 
 # Predictions on testing data
-y_test_tree = tree_model.predict(X_test)
+y_test_tree = tree_model.predict(x_test)
 
 # Calculate errors
-tree_train_mae = mean_absolute_error(Y_train, y_train_tree)
-tree_test_mae = mean_absolute_error(Y_test, y_test_tree)
+tree_train_mae = mean_absolute_error(y_train, y_train_tree)
+tree_test_mae = mean_absolute_error(y_test, y_test_tree)
 
 print("Training MAE:", round(tree_train_mae, 2))
 print("Testing MAE:", round(tree_test_mae, 2))
@@ -479,11 +473,11 @@ print("Training Accuracy", round(tree_trainig_accuracy, 2))
 print("Testing Accuracy", round(tree_testing_accuracy, 2))
 
 # %%
-y_train_tree = tree_model.predict(X_train)
-y_test_tree = tree_model.predict(X_test)
+y_train_tree = tree_model.predict(x_train)
+y_test_tree = tree_model.predict(x_test)
 
-train_accuracy_tree = accuracy_score(Y_train, y_train_tree)
-test_accuracy_tree = accuracy_score(Y_test, y_test_tree)
+train_accuracy_tree = accuracy_score(y_train, y_train_tree)
+test_accuracy_tree = accuracy_score(y_test, y_test_tree)
 
 print(f"Training Accuracy For Decision Tree : {train_accuracy_tree:.2%}")
 print(f"Testing Accuracy For Decision Tree : {test_accuracy_tree:.2%}")
@@ -492,13 +486,13 @@ print(f"Difference: {(train_accuracy_tree - test_accuracy_tree):.2%}")
 # %%
 # Evaluate the model
 print("Confusion Matrix:")
-print(confusion_matrix(Y_test, y_tree_prediction))
+print(confusion_matrix(y_test, y_tree_prediction))
 print("\nClassification Report:")
-print(classification_report(Y_test, y_tree_prediction))
+print(classification_report(y_test, y_tree_prediction))
 
 # %%
 # Visualize Confusion Matrix
-cm = confusion_matrix(Y_test, y_tree_prediction)
+cm = confusion_matrix(y_test, y_tree_prediction)
 sns.heatmap(cm, annot=True, fmt="d")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
@@ -506,46 +500,56 @@ plt.show()
 
 # %%
 # ROC Curve and AUC Score
-y_tree = tree_model.predict_proba(X_test)[:, 1]
-fpr, tpr, _ = roc_curve(Y_test, y_tree)
+y_tree = tree_model.predict_proba(x_test)[:, 1]
+fpr, tpr, _ = roc_curve(y_test, y_tree)
 plt.plot(fpr, tpr, marker='.')
 plt.xlabel('False Positive Rate')
 plt.ylabel('True Positive Rate')
 plt.title('ROC Curve')
 plt.show()
 
-auc_score = roc_auc_score(Y_test, y_tree)
+auc_score = roc_auc_score(y_test, y_tree)
 print(f"AUC Score: {auc_score:.2f}")
 
 # %% [markdown]
-# ## 📌 Model Evaluation & Final Conclusion
-# 
-# Based on the training and evaluation results of the different models on the Heart Disease dataset, the following conclusions were reached:
-# 
-# ### 📊 Summary of Model Performance:
-# 1. **Logistic Regression (Standard Baseline):**
-#    * **Testing Accuracy:** `88.59%` | **AUC Score:** `0.93`
-#    * **Performance:** Achieved the best balance and stability between training and testing data without noticeable overfitting (training-to-testing performance difference is stable at `-2.48%`).
-# 
-# 2. **K-Nearest Neighbors (KNN with K=5):**
-#    * **Testing Accuracy:** `88.59%` | **AUC Score:** `0.93`
-#    * **Performance:** Matched the top accuracy of the standard Logistic Regression model with consistent performance across training and validation (only a `0.11%` difference), reflecting the effectiveness of the applied Feature Scaling.
-# 
-# 3. **Logistic Regression with Polynomial Features :**
-#    * **Testing Accuracy:** `85.87%` | **AUC Score:** `0.91`
-#    * **Performance:** Introducing Polynomial Features caused feature explosion (up to 253 features), leading to initial overfitting. Although **Lasso (L1 Penalty)** successfully zeroed out noisy features and improved test accuracy slightly from `85.33%` to `85.87%`, the simpler baseline model remains more efficient.
-# 
-# 4. **Decision Tree Classifier:**
-#    * **Testing Accuracy:** `84.24%` | **AUC Score:** `0.87`
-#    * **Performance:** Showed a noticeable tendency toward overfitting (training accuracy `89.51%` vs. testing accuracy `84.24%`) due to unconstrained tree depth and growing complexity.
+# ## 📊 Model Evaluation & Comparison Results (Binary Classification)
 # 
 # ---
 # 
-# ### 🏆 Best Recommended Models for Deployment:
-# * **`Standard Logistic Regression` & `KNN (K=5)`** are the top-performing and most efficient models for this project.
-# * **Medical & Technical Rationale:**
-#   1. Both achieved the highest test accuracy (**88.59%**) and highest **AUC Score (0.93)**, indicating superior discriminative power between healthy individuals and heart disease patients.
-#   2. **Logistic Regression** is particularly preferred in clinical/medical domains due to its high interpretability, allowing analysts to evaluate the precise impact and weight of each biomarker (such as blood pressure and cholesterol) on diagnostic decisions.
-#   3. Simpler and distance/linear-based models proved to be more stable and robust for this dataset compared to high-dimensional polynomial expansions.
+# ### 1️⃣ Standard Logistic Regression Model
+# * **Training Accuracy:** 86.10% | **Testing Accuracy:** 88.59% (Difference: -2.48%)
+# * **Training MAE:** 0.14 | **Testing MAE:** 0.11
+# * **AUC Score:** **0.93** (High discriminative power)
+# * **Performance Overview:** Shows excellent stability with zero overfitting, slightly outperforming on test data compared to train data.
+# 
+# ---
+# 
+# ### 2️⃣ Polynomial Logistic Regression Model
+# * **Training Accuracy:** 90.87% | **Testing Accuracy:** 82.61% (Difference: +8.26%)
+# * **Training MAE:** 0.09 | **Testing MAE:** 0.17
+# * **AUC Score:** 0.87
+# * **Performance Overview:** Displays signs of **Overfitting** (8.26% gap), where adding polynomial features increased training performance but decreased generalizability on unseen test data.
+# 
+# ---
+# 
+# ### 3️⃣ K-Nearest Neighbors (KNN - Best $k=5$)
+# * **Training Accuracy:** 88.15% | **Testing Accuracy:** **89.67%** (Difference: -1.53%)
+# * **Training MAE:** 0.12 | **Testing MAE:** **0.10** (Lowest testing error)
+# * **AUC Score:** 0.92
+# * **Performance Overview:** **Best Performing Model.** Achieved the highest testing accuracy (89.67%) with robust stability and a balanced F1-score of 0.90 for Class 1.
+# 
+# ---
+# 
+# ### 4️⃣ Decision Tree (Best Depth = 3)
+# * **Training Accuracy:** 85.56% | **Testing Accuracy:** 80.98% (Difference: +4.58%)
+# * **Training MAE:** 0.14 | **Testing MAE:** 0.19
+# * **AUC Score:** 0.88
+# * **Performance Overview:** Moderate performance with a slight generalization gap, recording the lowest testing accuracy among all tested models.
+# 
+# ---
+# 
+# ### 🏆 Summary Verdict
+# * **Best Model:** **KNN ($k=5$)** achieved the highest overall testing accuracy (**89.67%**) and lowest testing MAE (**0.10**).
+# * **Runner-Up:** **Standard Logistic Regression** closely followed with **88.59%** accuracy and an impressive **AUC Score of 0.93**, offering high stability and interpretability without overfitting.
 
 
